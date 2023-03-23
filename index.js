@@ -39,6 +39,10 @@ mongoose.connection.on('disconnected', () => {
 
 //! ROUTES
 
+app.get('/', (req, res) => {
+    res.send("Hi, I am live");
+})
+
 app.use("/api/V1/auth", require("./routes/auth"));
 app.use("/api/V1/devices", require("./routes/devices"));
 app.use("/api/V1/dashboards", require("./routes/dashboards"));
