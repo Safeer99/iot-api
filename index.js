@@ -8,7 +8,7 @@ const cors = require("cors")
 
 //! CONFIGURATIONS
 
-const port = 8800;
+const port = process.env.PORT || 8800;
 const app = express();
 dotenv.config();
 app.use(express.json());
