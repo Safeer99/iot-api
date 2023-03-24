@@ -22,13 +22,18 @@ router.get('/:username/:id/:key', checkCredentials, async (req, res) => {
 
         const widgets = await Widget.find({ deviceId: req.device._id })
 
+        let value = null;
+
         widgets.forEach(widget => {
-            if (deviceResources.resources[widget.resourceId - 1].name === req.body.name && deviceResources.resources[widget.resourceId - 1].pin === req.body.pin) {
-                return res.status(200).json({ status: "success", data: { value: widget.value } })
+            if (deviceResources.resources[widget.resourceId - 1].name === req.body.name &&
+                deviceResources.resources[widget.resourceId - 1].pin === req.body.pin
+            ) {
+                value = widget.value;
             }
         })
 
-        return res.status(404).json({ status: "fail", message: "value not found" })
+        if (value) return res.status(200).json({ status: "success", data: { value } })
+        else return res.status(404).json({ status: "fail", message: "value not found" })
 
     } catch (error) {
         return res.status(500).json({ status: "fail", error });

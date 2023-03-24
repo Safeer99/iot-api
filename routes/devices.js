@@ -35,7 +35,20 @@ router.get("/:id", async (req, res) => {
     }
 })
 
+//? get a single device
+router.get("/device/:id", async (req, res) => {
+    try {
+        console.log(req.params.id)
+        const device = await Device.findById(req.params.id);
+        if (!device)
+            return res.status(404).json({ status: "fail", message: "invalid data" });
 
+        return res.status(200).json({ status: "success", data: { device } });
+
+    } catch (error) {
+        return res.status(500).json({ status: "fail", error });
+    }
+})
 
 //? delete a device
 router.delete("/:id", async (req, res) => {
@@ -65,8 +78,10 @@ router.delete("/:id", async (req, res) => {
 router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
     try {
         const device = req.device;
-        // await device.updateOne({ status: "offline" });
-        await device.updateOne({ status: "online" });
+        if (device.status === "online")
+            await device.updateOne({ status: "offline" });
+        else
+            await device.updateOne({ status: "online" });
 
         const resources = await Resource.findOne({ deviceId: device._id });
 
@@ -78,5 +93,6 @@ router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
         return res.status(500).json({ status: "fail", error });
     }
 })
+
 
 module.exports = router;
