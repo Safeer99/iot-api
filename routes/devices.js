@@ -38,7 +38,6 @@ router.get("/:id", async (req, res) => {
 //? get a single device
 router.get("/device/:id", async (req, res) => {
     try {
-        console.log(req.params.id)
         const device = await Device.findById(req.params.id);
         if (!device)
             return res.status(404).json({ status: "fail", message: "invalid data" });
