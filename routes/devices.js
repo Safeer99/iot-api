@@ -86,7 +86,7 @@ router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
 
         await resources.updateOne({ resources: [] });
 
-        return res.status(200).json({ status: "success", message: "connected" });
+        return res.status(200).json({ status: "success", message: device.status === "offline" ? "connected" : "disconnected" });
 
     } catch (error) {
         return res.status(500).json({ status: "fail", error });

@@ -1,5 +1,4 @@
 const checkCredentials = require("../middlewares/checkCredentials");
-const Resource = require("../models/Resource");
 const Widget = require("../models/Widget");
 
 const router = require("express").Router();
@@ -15,24 +14,37 @@ router.post("/", async (req, res) => {
     }
 })
 
-//? get the value of a widget via resource
+//? update the value of a widget
+router.put('/:id', async (req, res) => {
+    try {
+        const widget = await Widget.findById(req.params.id);
+
+        if (!widget)
+            return res.status(404).json({ status: "fail", message: "No widget found" });
+
+        await widget.updateOne({ value: req.body.value });
+
+        return res.status(200).json({ status: "success", message: "value updated" });
+
+    } catch (error) {
+        return res.status(500).json({ status: "fail", error });
+    }
+})
+
+//? get the value of a widget
 router.get('/:username/:id/:key', checkCredentials, async (req, res) => {
     try {
-        const deviceResources = await Resource.findOne({ deviceId: req.device._id });
-
         const widgets = await Widget.find({ deviceId: req.device._id })
 
         let value = null;
 
         widgets.forEach(widget => {
-            if (deviceResources.resources[widget.resourceId - 1].name === req.body.name &&
-                deviceResources.resources[widget.resourceId - 1].pin === req.body.pin
-            ) {
+            if (widget.resourceName === req.body.name) {
                 value = widget.value;
             }
         })
 
-        if (value) return res.status(200).json({ status: "success", data: { value } })
+        if (value !== null) return res.status(200).json({ status: "success", data: { value } })
         else return res.status(404).json({ status: "fail", message: "value not found" })
 
     } catch (error) {
