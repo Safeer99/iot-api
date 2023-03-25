@@ -14,6 +14,16 @@ router.post("/", async (req, res) => {
     }
 })
 
+router.get('/:id', async (req, res) => {
+    try {
+        const widgets = await Widget.find({ dashboardId: req.params.id });
+
+        return res.status(200).json({ status: "success", data: { widgets } })
+    } catch (error) {
+        return res.status(500).json({ status: "fail", error })
+    }
+})
+
 //? update the value of a widget
 router.put('/:id', async (req, res) => {
     try {
