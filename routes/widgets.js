@@ -1,64 +1,50 @@
-const checkCredentials = require("../middlewares/checkCredentials");
 const Widget = require("../models/Widget");
-
 const router = require("express").Router();
 
 //? create a widget
 router.post("/", async (req, res) => {
     try {
-        const newWidget = new Widget(req.body);
-        const widget = await newWidget.save();
-        return res.status(200).json({ status: "success", data: { widget } })
+
+        const widget = await Widget.create(req.body);
+
+        return res.status(201).json({ status: "success", data: { widget } })
+
     } catch (error) {
-        return res.status(500).json({ status: "fail", error });
+        return res.status(400).json({ status: "fail", message: error });
     }
 })
 
+//? get all the widgets of a dashboard
 router.get('/:id', async (req, res) => {
     try {
         const widgets = await Widget.find({ dashboardId: req.params.id });
 
         return res.status(200).json({ status: "success", data: { widgets } })
     } catch (error) {
-        return res.status(500).json({ status: "fail", error })
+        return res.status(404).json({ status: "fail", message: error })
     }
 })
 
-//? update the value of a widget
-router.put('/:id', async (req, res) => {
+//? update the widget
+router.patch('/:id', async (req, res) => {
     try {
-        const widget = await Widget.findById(req.params.id);
+        const widget = await Widget.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
 
-        if (!widget)
-            return res.status(404).json({ status: "fail", message: "No widget found" });
-
-        await widget.updateOne({ value: req.body.value });
-
-        return res.status(200).json({ status: "success", message: "value updated" });
+        return res.status(200).json({ status: "success", data: { widget } });
 
     } catch (error) {
-        return res.status(500).json({ status: "fail", error });
+        return res.status(404).json({ status: "fail", message: error });
     }
 })
 
-//? get the value of a widget
-router.get('/:username/:id/:key', checkCredentials, async (req, res) => {
+//? delete the widget
+router.delete('/:id', async (req, res) => {
     try {
-        const widgets = await Widget.find({ deviceId: req.device._id })
+        await Widget.findByIdAndDelete(req.params.id);
 
-        let value = null;
-
-        widgets.forEach(widget => {
-            if (widget.resourceName === req.body.name) {
-                value = widget.value;
-            }
-        })
-
-        if (value !== null) return res.status(200).json({ status: "success", data: { value } })
-        else return res.status(404).json({ status: "fail", message: "value not found" })
-
+        return res.status(204).json({ status: "success", message: "widget deleted" });
     } catch (error) {
-        return res.status(500).json({ status: "fail", error });
+        return res.status(404).json({ status: "fail", message: error });
     }
 })
 

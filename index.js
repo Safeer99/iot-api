@@ -21,8 +21,10 @@ app.use(cors());
 
 //! connecting to database
 
+const URL = process.env.MONGO_URL.replace("<PASSWORD>", process.env.DATABASE_PASSWORD)
+
 mongoose.set('strictQuery', false);
-mongoose.connect(process.env.MONGO_URL, {
+mongoose.connect(URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -46,5 +48,5 @@ app.get('/', (req, res) => {
 app.use("/api/V1/auth", require("./routes/auth"));
 app.use("/api/V1/devices", require("./routes/devices"));
 app.use("/api/V1/dashboards", require("./routes/dashboards"));
-app.use("/api/V1/resources", require("./routes/resources"));
 app.use("/api/V1/widgets", require("./routes/widgets"));
+app.use("/api/V1/server", require("./routes/server"));

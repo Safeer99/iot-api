@@ -14,10 +14,10 @@ router.post("/register", async (req, res) => {
         })
 
         const user = await newUser.save();
-        res.status(200).json({ status: "success", data: { user } });
+        res.status(201).json({ status: "success", data: { user } });
 
     } catch (error) {
-        res.status(500).json({ status: "fail", error });
+        res.status(400).json({ status: "fail", message: error });
     }
 })
 
@@ -25,10 +25,6 @@ router.post("/login", async (req, res) => {
     try {
 
         const user = await User.findOne({ email: req.body.email });
-
-        if (!user) {
-            return res.status(404).json({ status: "fail", message: "invalid email or password" });
-        }
 
         const salt = process.env.SECRET_KEY;
         var bytes = CryptoJS.AES.decrypt(user.password, salt);
@@ -41,7 +37,7 @@ router.post("/login", async (req, res) => {
         res.status(200).json({ status: "success", data: { user } });
 
     } catch (error) {
-        res.status(500).json({ status: "fail", error });
+        res.status(404).json({ status: "fail", message: error });
     }
 })
 
