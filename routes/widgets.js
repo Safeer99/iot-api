@@ -19,7 +19,7 @@ router.get('/:id', async (req, res) => {
     try {
         const widgets = await Widget.find({ dashboardId: req.params.id });
 
-        return res.status(200).json({ status: "success", data: { widgets } })
+        return res.status(200).json({ status: "success", results: widgets.length, data: { widgets } })
     } catch (error) {
         return res.status(404).json({ status: "fail", message: error })
     }

@@ -20,7 +20,7 @@ router.get("/:id", async (req, res) => {
 
         const dashboards = await Dashboard.find({ userId: user._id });
 
-        return res.status(200).json({ status: "success", data: { dashboards } });
+        return res.status(200).json({ status: "success", results: dashboards.length, data: { dashboards } });
 
     } catch (error) {
         return res.status(404).json({ status: "fail", message: error });

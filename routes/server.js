@@ -15,28 +15,25 @@ router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({ status: "fail", error });
+        return res.status(404).json({ status: "fail", message: error });
     }
 })
 
 //? get the value of a widget
 router.get('/:username/:id/:key', checkCredentials, async (req, res) => {
     try {
-        const widgets = await Widget.find({ deviceId: req.device._id })
-
-        let value = null;
-
-        widgets.forEach(widget => {
-            if (widget.resource === req.body.name) {
-                value = widget.value;
-            }
+        const widgets = await Widget.find({
+            deviceId: req.device._id,
+            resource: req.query?.name
         })
 
-        if (value !== null) return res.status(200).json({ status: "success", data: { value } })
-        else return res.status(404).json({ status: "fail", message: "value not found" })
+        if (widgets.length > 1)
+            return res.status(404).json({ status: "fail", message: "There are multiple resource with same name" })
+
+        return res.status(200).json({ status: "success", data: { value: widgets[0].value } })
 
     } catch (error) {
-        return res.status(500).json({ status: "fail", error });
+        return res.status(404).json({ status: "fail", messsage: error });
     }
 })
 
