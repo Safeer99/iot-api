@@ -5,13 +5,17 @@ const router = require("express").Router();
 //? established connection
 router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
     try {
+
+        if (req.query?.status !== "online" && req.query?.status !== "offline")
+            return res.status(404).json({ status: "fail", message: "Invalid" })
+
         const device = req.device;
 
-        await device.updateOne({ status: req.body.status });
+        await device.updateOne({ status: req.query?.status });
 
         return res.status(200).json({
             status: "success",
-            message: req.body.status === "online" ? "connected" : "disconnected"
+            message: req.query?.status === "online" ? "connected" : "disconnected"
         });
 
     } catch (error) {
@@ -22,6 +26,9 @@ router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
 //? get the value of a widget
 router.get('/:username/:id/:key', checkCredentials, async (req, res) => {
     try {
+        if (req.device.status === "offline")
+            return res.status(404).json({ status: "fail", message: "Device is currently offline" })
+
         const widgets = await Widget.find({
             deviceId: req.device._id,
             resource: req.query?.name
