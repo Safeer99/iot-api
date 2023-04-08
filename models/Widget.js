@@ -14,8 +14,8 @@ const WidgetSchema = new mongoose.Schema({
         required: true
     },
     value: {
-        type: Number,
-        default: 0
+        type: Array,
+        default: [0]
     },
     background: {
         type: String,
