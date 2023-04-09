@@ -2,12 +2,12 @@ const checkCredentials = require("../middlewares/checkCredentials");
 const Widget = require("../models/Widget");
 const router = require("express").Router();
 
-//? established connection
+//? Establishing connection
 router.put("/:username/:id/:key", checkCredentials, async (req, res) => {
     try {
 
         if (req.query?.status !== "online" && req.query?.status !== "offline")
-            return res.status(404).json({ status: "fail", message: "Invalid" })
+            return res.status(404).json({ status: "fail", message: "Invalid query" })
 
         const device = req.device;
 
@@ -29,19 +29,12 @@ router.put("/input/:username/:id/:key", checkCredentials, async (req, res) => {
         if (req.device.status === "offline")
             return res.status(404).json({ status: "fail", message: "Device is currently offline" })
 
-        const widgets = await Widget.find({
-            deviceId: req.device._id,
-            resource: req.query?.name
-        })
+        const widgets = await Widget.updateMany(
+            { deviceId: req.device._id, resource: req.query?.name },
+            { $push: { value: req.body.value } }
+        )
 
-        if (widgets.length > 1)
-            return res.status(404).json({ status: "fail", message: "There are multiple resource with same name" })
-
-        await widgets[0].updateOne({
-            $push: { value: req.body.value }
-        })
-
-        return res.status(200).json({ status: "success", message: "Value updated" })
+        return res.status(200).json({ status: "success", message: "Value updated", data: { widgets } })
 
     } catch (error) {
         return res.status(404).json({ status: "fail", message: error });
@@ -59,10 +52,19 @@ router.get('/output/:username/:id/:key', checkCredentials, async (req, res) => {
             resource: req.query?.name
         })
 
-        if (widgets.length > 1)
-            return res.status(404).json({ status: "fail", message: "There are multiple resource with same name" })
+        let latestUpdated = {
+            updatedAt: 0,
+            value: [],
+        }
 
-        return res.status(200).json({ status: "success", data: { value: widgets[0].value[0] } })
+        widgets.forEach(element => {
+            if (latestUpdated.updatedAt < element.updatedAt) {
+                latestUpdated.updatedAt = element.updatedAt;
+                latestUpdated.value = element.value;
+            }
+        });
+
+        return res.status(200).json({ status: "success", data: { value: latestUpdated.value[0] } })
 
     } catch (error) {
         return res.status(404).json({ status: "fail", messsage: error });

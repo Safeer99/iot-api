@@ -37,6 +37,23 @@ router.patch('/:id', async (req, res) => {
     }
 })
 
+//? update the value of all the similar widgets
+router.patch('/value/:id', async (req, res) => {
+    try {
+        const widget = await Widget.findById(req.params.id);
+
+        const widgets = await Widget.updateMany(
+            { deviceId: widget.deviceId, resource: widget.resource },
+            { value: [req.body.value] }
+        )
+
+        return res.status(200).json({ status: "success", message: "value updated successfully", data: { widgets } })
+
+    } catch (error) {
+        return res.status(404).json({ status: "fail", message: error });
+    }
+})
+
 //? delete the widget
 router.delete('/:id', async (req, res) => {
     try {
