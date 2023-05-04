@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const CryptoJS = require("crypto-js");
+const jwt = require('jsonwebtoken');
 const User = require("../models/User");
+const fetchUser = require("../middlewares/fetchUser");
 
 router.post("/register", async (req, res) => {
     try {
@@ -14,10 +16,20 @@ router.post("/register", async (req, res) => {
         })
 
         const user = await newUser.save();
-        res.status(201).json({ status: "success", data: { user } });
+
+        const data = {
+            user: {
+                id: user._id,
+                name: user.username
+            }
+        }
+
+        const authToken = jwt.sign(data, process.env.JWT_SECRET);
+
+        return res.status(201).json({ status: "success", data: { token: authToken } });
 
     } catch (error) {
-        res.status(400).json({ status: "fail", message: error });
+        return res.status(400).json({ status: "fail", message: error });
     }
 })
 
@@ -34,10 +46,31 @@ router.post("/login", async (req, res) => {
             return res.status(404).json({ status: "fail", message: "invalid email or password" });
         }
 
-        res.status(200).json({ status: "success", data: { user } });
+        const data = {
+            user: {
+                id: user._id,
+                name: user.username
+            }
+        }
+
+        const authToken = jwt.sign(data, process.env.JWT_SECRET)
+
+        return res.status(200).json({ status: "success", data: { token: authToken } });
 
     } catch (error) {
-        res.status(404).json({ status: "fail", message: error });
+        return res.status(404).json({ status: "fail", message: error });
+    }
+})
+
+router.post('/getuser', fetchUser, async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user.id).select("-password -__v -updatedAt -_id")
+
+        return res.status(200).json({ status: "success", data: { user } })
+
+    } catch (error) {
+        return res.status(404).json({ status: "fail", message: error });
     }
 })
 

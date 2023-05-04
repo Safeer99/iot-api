@@ -5,7 +5,7 @@ const DashboardSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    dashboardId: {
+    dashboard:{
         type: String,
         required: true
     },
@@ -17,17 +17,19 @@ const DashboardSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    background: {
-        type: String,
-        default: "#fff"
-    },
-    columns: {
-        type: Number,
-        default: 6,
-    },
-    rowHeight: {
-        type: Number,
-        default: 50
+    properties:{
+        background: {
+            type: String,
+            default: "#fff"
+        },
+        columns: {
+            type: Number,
+            default: 6,
+        },
+        rowHeight: {
+            type: Number,
+            default: 50
+        }
     }
 }, { timestamps: true })
 
